@@ -35,7 +35,7 @@ class Normalization():
     def _get_total_non_toxic_comments_count(self) -> int:
         return len(self._non_toxic_corpus)
     
-    def show_corpus_stats(self):
+    def show_corpus_stats(self) -> None:
         """
         show_corpus_stats aims to perform repeatative prints for corpus metrics such as its length, etc.
         """
