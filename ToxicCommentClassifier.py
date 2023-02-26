@@ -16,7 +16,7 @@ class Normalization():
     _toxic_corpus = None
     _non_toxic_corpus =None
     
-    def __init__(self, file_path = os.getcwd()+"/datasets/train.csv") -> None:
+    def __init__(self, file_path) -> None:
         """
         The constructor just tries to initialize the class attributes.
         Even those which are private.
@@ -125,12 +125,26 @@ class BernoulliDistribution():
         """
         pass
 
-    def train_NB_model(self) -> BernoulliNB():
+    def _transform_data(self, data_to_be_transformed) -> list(list()):
+        """
+        Transforms the current set of statements into a sparse matrix.
+        """
+        try:
+            pass
+        except Exception as e:
+            print("[ERR] The following error occured while trying to vectorize the train set: " +str(e))
+
+    def train_NB_model(self, path_to_train_file =  "./datasets/train.csv") -> BernoulliNB():
         """
         This method trains a BernoulliNB model, against the data set that we have and then returns a trained Model.
         """
-        pass
+        try:
+            self._normalizer = Normalization(path_to_train_file) #create the object that should be useful for normalizing the entire dataset.
+            self._normalizer.normalize() #Normalization is performed on entire dataset, and respective corpuses are created.
+            self._normalizer.show_corpus_stats()
+        except Exception as e:
+            print("[ERR] The following error occured while trying to Train a Bernoulli NB model: "+str(e))
 
 
-obj = Normalization()
-obj.normalize()
+obj = BernoulliDistribution()
+obj.train_NB_model()
