@@ -11,7 +11,7 @@ class Normalization():
     """
     This class performs normalization on our entire dataset, as the confusion matrix is sparse without normalization.
     """
-    _data_set = None
+    __data_set = None
     _corpus = None
     _toxic_corpus = None
     _non_toxic_corpus =None
@@ -23,7 +23,7 @@ class Normalization():
         """
         try:
             
-            self._data_set = pd.read_csv(file_path)
+            self.__data_set = pd.read_csv(file_path)
             
             print("[INFO] data_set has been initiallized")
 
@@ -63,7 +63,7 @@ class Normalization():
         Normalization.normalize() is the method that performs normalization on the data.
         """
         try:
-            self._data_set = self._data_set.drop(columns=["id", "obscene", "severe_toxic", "threat", "insult", "identity_hate"])
+            self.__data_set = self.__data_set.drop(columns=["id", "obscene", "severe_toxic", "threat", "insult", "identity_hate"])
             print("[INFO] Irrelevant columns have been dropped.")
 
             self.build_corpus() #creates a list of tuples, where each tuple is a combination of comment_text and is_toxic flag. :)
@@ -91,7 +91,7 @@ class Normalization():
         try:
             print("[PROCESS] Creating corpus from data_frame, this might take a while :)")
 
-            for row in self._data_set.values:
+            for row in self.__data_set.values:
                 #row[0] is the comment_text made by the user, row[1] is the is_toxic flag.
                 comment = self.normalize_comment(row[0])
                 
@@ -118,12 +118,16 @@ class BernoulliDistribution():
     2) test_NB_model(): which tests the given file against model that we create.
     """
     _normalizer = None
+    __vectorizer = None
 
     def __init__(self) -> None:
         """
         Constructor initializes the attributes of the class which are necessary.
         """
-        pass
+        try:
+            self.__vectorizer = CountVectorizer()
+        except Exception as e:
+            print("[ERR] The following error occured while trying to Initialize values for Bernoulli Class: "+str(e))
 
     def _transform_data(self, data_to_be_transformed) -> list(list()):
         """
@@ -141,7 +145,7 @@ class BernoulliDistribution():
         try:
             self._normalizer = Normalization(path_to_train_file) #create the object that should be useful for normalizing the entire dataset.
             self._normalizer.normalize() #Normalization is performed on entire dataset, and respective corpuses are created.
-            self._normalizer.show_corpus_stats()
+            
         except Exception as e:
             print("[ERR] The following error occured while trying to Train a Bernoulli NB model: "+str(e))
 
