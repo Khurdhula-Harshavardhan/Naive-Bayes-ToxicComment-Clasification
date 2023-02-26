@@ -1,6 +1,11 @@
 import re
 import os
 import pandas as pd
+from sklearn.naive_bayes import GaussianNB
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 class Normalization():
     """
@@ -107,9 +112,24 @@ class Normalization():
             print("[ERR] the following error occured while trying to create corpus out of data_frame. : %s"%(str(e)))
 
 class BernoulliDistribution():
+    """
+    This is the main class that implements the required methods.
+    1) train_NB_model(): which returns a trained model.
+    2) test_NB_model(): which tests the given file against model that we create.
+    """
+    _normalizer = None
+
     def __init__(self) -> None:
+        """
+        Constructor initializes the attributes of the class which are necessary.
+        """
         pass
 
+    def train_NB_model(self) -> BernoulliNB():
+        """
+        This method trains a BernoulliNB model, against the data set that we have and then returns a trained Model.
+        """
+        pass
 
 
 obj = Normalization()
