@@ -12,9 +12,9 @@ class Normalization():
     This class performs normalization on our entire dataset, as the confusion matrix is sparse without normalization.
     """
     __data_set = None
-    _corpus = None
-    _toxic_corpus = None
-    _non_toxic_corpus =None
+    _corpus = None #contains all comments. [(comment, is_toxic)]
+    _toxic_corpus = None #contains all toxic comments. [(comment, is_toxic)]
+    _non_toxic_corpus =None #contains all non toxic comments. [(comment, is_toxic)]
     
     def __init__(self, file_path) -> None:
         """
@@ -99,7 +99,7 @@ class Normalization():
                     continue
 
                 row[0] = comment
-                row = (row[0], row[1])
+                row = [row[0], row[1]]
                 self._corpus.append(row)
 
                 if row[1] == 1:
@@ -119,13 +119,17 @@ class BernoulliDistribution():
     """
     _normalizer = None
     __vectorizer = None
-
+    __X = None
+    __y = None
+    __model = None
     def __init__(self) -> None:
         """
         Constructor initializes the attributes of the class which are necessary.
         """
         try:
             self.__vectorizer = CountVectorizer()
+            self.__y = list()
+            self.__model = BernoulliNB()
         except Exception as e:
             print("[ERR] The following error occured while trying to Initialize values for Bernoulli Class: "+str(e))
 
@@ -134,7 +138,7 @@ class BernoulliDistribution():
         Transforms the current set of statements into a sparse matrix.
         """
         try:
-            pass
+            return self.__vectorizer.fit_transform(data_to_be_transformed)
         except Exception as e:
             print("[ERR] The following error occured while trying to vectorize the train set: " +str(e))
 
@@ -145,7 +149,16 @@ class BernoulliDistribution():
         try:
             self._normalizer = Normalization(path_to_train_file) #create the object that should be useful for normalizing the entire dataset.
             self._normalizer.normalize() #Normalization is performed on entire dataset, and respective corpuses are created.
-            
+            self.__X = pd.DataFrame(self._normalizer._corpus)
+            self.__y = self.__X[1]
+            print("[PROCESS] Creating countVectors for the corpus please wait!")
+            self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
+
+            #train the model.
+            print("[PROCESS] Fitting a BernoulliNaiveBayes, model to the data! Please wait this might take some time!")
+            self.__model.fit(self.__X_vectorized, self.__y)
+            print("[UPDATE] The model has been trained successfully!")
+            return self.__model
         except Exception as e:
             print("[ERR] The following error occured while trying to Train a Bernoulli NB model: "+str(e))
 
