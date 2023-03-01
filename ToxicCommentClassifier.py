@@ -121,6 +121,11 @@ class BernoulliDistribution():
     __vectorizer = None
     __X = None
     __y = None
+    __X_vectorized = None
+    _X_train = None
+    _X_test = None
+    _y_train = None
+    _y_test = None
     __model = None
     def __init__(self) -> None:
         """
@@ -150,13 +155,14 @@ class BernoulliDistribution():
             self._normalizer = Normalization(path_to_train_file) #create the object that should be useful for normalizing the entire dataset.
             self._normalizer.normalize() #Normalization is performed on entire dataset, and respective corpuses are created.
             self.__X = pd.DataFrame(self._normalizer._corpus)
+            
             self.__y = self.__X[1]
             print("[PROCESS] Creating countVectors for the corpus please wait!")
             self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
-
+            self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
             #train the model.
             print("[PROCESS] Fitting a BernoulliNaiveBayes, model to the data! Please wait this might take some time!")
-            self.__model.fit(self.__X_vectorized, self.__y)
+            self.__model.fit(self._X_train, self._y_train)
             print("[UPDATE] The model has been trained successfully!")
             return self.__model
         except Exception as e:
@@ -173,4 +179,5 @@ class BernoulliDistribution():
             print("[ERR] The following error occured while trying to test the model for accuracy! "+str(e))
 
 obj = BernoulliDistribution()
-obj.train_NB_model()
+trained_model = obj.train_NB_model()
+print(trained_model)
