@@ -6,6 +6,7 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+import joblib
 
 class Normalization():
     """
@@ -127,6 +128,7 @@ class BernoulliDistribution():
     _y_train = None
     _y_test = None
     __model = None
+    _accuracy = None
     def __init__(self) -> None:
         """
         Constructor initializes the attributes of the class which are necessary.
@@ -135,8 +137,18 @@ class BernoulliDistribution():
             self.__vectorizer = CountVectorizer()
             self.__y = list()
             self.__model = BernoulliNB()
+            self._accuracy = float()
         except Exception as e:
             print("[ERR] The following error occured while trying to Initialize values for Bernoulli Class: "+str(e))
+
+    def save_model(self) -> None:
+        """
+        Implements model persistence.
+        """
+        try:
+            pass
+        except Exception as e:
+            print("[ERR] The following error occured while trying to dump model.")
 
     def _transform_data(self, data_to_be_transformed) -> list(list()):
         """
@@ -174,10 +186,13 @@ class BernoulliDistribution():
         The split will be based on vectorizated Trained X as well.
         """
         try:
-            pass
+            predictions = model.predict(self._X_test)
+            self._accuracy = accuracy_score(predictions, self._y_test)
+            print("[INFO] The accuracy for the trained model is: %f"%(self._accuracy))
+            return self._accuracy
         except Exception as e:
             print("[ERR] The following error occured while trying to test the model for accuracy! "+str(e))
 
 obj = BernoulliDistribution()
 trained_model = obj.train_NB_model()
-print(trained_model)
+print(obj.traditional_test(trained_model))
