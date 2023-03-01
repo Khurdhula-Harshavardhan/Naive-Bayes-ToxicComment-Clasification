@@ -162,6 +162,15 @@ class BernoulliDistribution():
         except Exception as e:
             print("[ERR] The following error occured while trying to Train a Bernoulli NB model: "+str(e))
 
+    def traditional_test(self, model) -> float():
+        """
+        This method tests the trained model on split data and returns the accuracy score of the model.
+        The split will be based on vectorizated Trained X as well.
+        """
+        try:
+            pass
+        except Exception as e:
+            print("[ERR] The following error occured while trying to test the model for accuracy! "+str(e))
 
 obj = BernoulliDistribution()
 obj.train_NB_model()
