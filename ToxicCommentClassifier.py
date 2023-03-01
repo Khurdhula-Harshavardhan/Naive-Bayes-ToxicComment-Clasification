@@ -129,6 +129,7 @@ class BernoulliDistribution():
     _y_test = None
     __model = None
     _accuracy = None
+    __MODEL_NAME = None #constant.
     def __init__(self) -> None:
         """
         Constructor initializes the attributes of the class which are necessary.
@@ -138,6 +139,7 @@ class BernoulliDistribution():
             self.__y = list()
             self.__model = BernoulliNB()
             self._accuracy = float()
+            self.__MODEL_NAME = "BernoulliClassifier.joblib"
         except Exception as e:
             print("[ERR] The following error occured while trying to Initialize values for Bernoulli Class: "+str(e))
 
@@ -146,7 +148,7 @@ class BernoulliDistribution():
         Implements model persistence.
         """
         try:
-            joblib.dump(self.__model, "BernoulliClassifier.joblib")
+            joblib.dump(self.__model, self.__MODEL_NAME)
             print("[INFO] The newly trained model has been saved as BernoulliClassifier.joblib")
         except Exception as e:
             print("[ERR] The following error occured while trying to dump model.")
@@ -156,10 +158,13 @@ class BernoulliDistribution():
         Checks if the model has already been saved previously, to save time that is consumed to fucking train a model again.
         """
         try:
-            pass
+            print("[PROCESS] Trying to load model %s that might have been previously saved after fitting."%(self.__MODEL_NAME))
+            self.__model = joblib.load(self.__MODEL_NAME)
+            return True
         except Exception as e:
             #we shall return false here.
-            print("[ERR] The following error occured while trying to load the model! " +str(e))
+            print("[INFO] A previously trained model does not exist, hence creating one!")
+            return False
 
     def _transform_data(self, data_to_be_transformed) -> list(list()):
         """
@@ -175,20 +180,28 @@ class BernoulliDistribution():
         This method trains a BernoulliNB model, against the data set that we have and then returns a trained Model.
         """
         try:
+            print("[IMPORTANT] Preparing corpus please wait!")
             self._normalizer = Normalization(path_to_train_file) #create the object that should be useful for normalizing the entire dataset.
             self._normalizer.normalize() #Normalization is performed on entire dataset, and respective corpuses are created.
             self.__X = pd.DataFrame(self._normalizer._corpus)
-            
+                
             self.__y = self.__X[1]
             print("[PROCESS] Creating countVectors for the corpus please wait!")
             self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
             self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
-            #train the model.
-            print("[PROCESS] Fitting a BernoulliNaiveBayes, model to the data! Please wait this might take some time!")
-            self.__model.fit(self._X_train, self._y_train) #train
-            print("[UPDATE] The model has been trained successfully!")
-            self.save_model() #model_persistence
-            return self.__model
+            print("[INFO] Checking for a previosly stored JOB file...")
+            if not self.load_model(): #if the model does not exist we must trian a new isntance of it and dump it.
+
+                #train the model.
+                print("[PROCESS] Fitting a BernoulliNaiveBayes, model to the data! Please wait this might take some time!")
+                self.__model.fit(self._X_train, self._y_train) #train
+                print("[UPDATE] The model has been trained successfully!")
+                self.save_model() #model_persistence
+                return self.__model
+            else:
+                print("[INFO] A previously trained model already exists, loading it.")
+                return self.__model
+            
         except Exception as e:
             print("[ERR] The following error occured while trying to Train a Bernoulli NB model: "+str(e))
 
