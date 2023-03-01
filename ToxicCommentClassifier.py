@@ -146,9 +146,20 @@ class BernoulliDistribution():
         Implements model persistence.
         """
         try:
-            pass
+            joblib.dump(self.__model, "BernoulliClassifier.joblib")
+            print("[INFO] The newly trained model has been saved as BernoulliClassifier.joblib")
         except Exception as e:
             print("[ERR] The following error occured while trying to dump model.")
+    
+    def load_model(self) -> bool:
+        """
+        Checks if the model has already been saved previously, to save time that is consumed to fucking train a model again.
+        """
+        try:
+            pass
+        except Exception as e:
+            #we shall return false here.
+            print("[ERR] The following error occured while trying to load the model! " +str(e))
 
     def _transform_data(self, data_to_be_transformed) -> list(list()):
         """
@@ -174,8 +185,9 @@ class BernoulliDistribution():
             self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
             #train the model.
             print("[PROCESS] Fitting a BernoulliNaiveBayes, model to the data! Please wait this might take some time!")
-            self.__model.fit(self._X_train, self._y_train)
+            self.__model.fit(self._X_train, self._y_train) #train
             print("[UPDATE] The model has been trained successfully!")
+            self.save_model() #model_persistence
             return self.__model
         except Exception as e:
             print("[ERR] The following error occured while trying to Train a Bernoulli NB model: "+str(e))
