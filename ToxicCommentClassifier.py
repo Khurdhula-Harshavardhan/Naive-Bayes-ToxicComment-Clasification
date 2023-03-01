@@ -218,6 +218,32 @@ class BernoulliDistribution():
         except Exception as e:
             print("[ERR] The following error occured while trying to test the model for accuracy! "+str(e))
 
+    def transform_single_comment(self, comment) -> list(list()) :
+        """
+        This method transforms a comment passed as an arguement into a 2D sparse Vector.
+        """
+        try:
+            return self.__vectorizer.transform(comment)
+        except Exception as e:
+            print("[ERR] The following error occured while trying to transform the test comment into a vector: " +str(e))
+
+    def predict_if_toxic(self, comment) -> bool:
+        """
+        This method returns the prediction made by the model for a single comment, to check if it is toxic.
+        """
+        try:
+            prediction  = self.__model.predict(self.transform_single_comment([comment])) #this is an array of predictions.
+            if prediction[0] == 0:
+                return False
+            else:
+                return True 
+        except Exception as e:
+            print("[ERR] The following error occured while trying to make a prediction: %s"%(str(e)))
+
 obj = BernoulliDistribution()
 trained_model = obj.train_NB_model()
 print(obj.traditional_test(trained_model))
+
+while True:
+    comment = input("Enter a comment to be tested: ")
+    print(obj.predict_if_toxic(comment))
