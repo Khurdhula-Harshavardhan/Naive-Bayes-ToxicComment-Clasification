@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plotter
 from sklearn.decomposition import PCA
 import joblib
+import numpy as np
 
 class Normalization():
     """
@@ -184,7 +185,6 @@ class BernoulliDistribution():
         """
         try:
             val = self.__y[ind]
-            print("Returning: %d"%(val))
             return val
         except Exception as e:
             pass
@@ -193,19 +193,26 @@ class BernoulliDistribution():
         """
         This method plots a graph for all the unique documents within the dataset.
         """
-        comments = comments[:10000]
+        
         X = self.__vectorizer.fit_transform(comments).toarray()
 
         # perform PCA on the word counts
         pca = PCA(n_components=2)
         X_pca = pca.fit_transform(X)
-        
+        plotter.figure(figsize=(8,8))
         # plot the comments on a scatter plot using PCA components 1 and 2
-        plotter.scatter(X_pca[:,0], X_pca[:,1], c = ['b']) #,  c=['r' if  self.check(i) == 1 else 'b' for i in range(len(X_pca[:,0]))])
+        plotter.scatter(X_pca[:,0], X_pca[:,1], c='b') #,c=['r' if  self.check(i) == 1 else 'b' for i in range(len(X_pca[:,0]))], cmap='coolwarm')
         plotter.xlabel('Feature Space')
         plotter.ylabel('Residual Variability')
-        #plotter.axhline(y=X_pca[:, 1].mean(), color='r', linestyle='--')
-        #plotter.axvline(x=X_pca[:, 0].mean(), color='r', linestyle='--')
+        # plotter.axhline(y=X_pca[:, 1].mean(), color='r', linestyle='--', label="Mean RV")
+        #plotter.axvline(x=X_pca[:, 0].mean(), color='gray', linestyle='--', label="Mean FS")
+        #plotter.axhline(y=np.median(X_pca[:,1]), color='black', linestyle='--', label='Median')
+        #plotter.axhline(y=np.mean(X_pca[:,1]), color='gray', linestyle='--', label='Mean')
+        plotter.axhline(y=1, color='red', linestyle='--', label='RV Threshold')
+        plotter.axvline(x =2, color='black', linestyle='--', label='SF Threshold')
+
+        
+        plotter.legend(loc='best')
 
         plotter.show()
 
@@ -221,8 +228,10 @@ class BernoulliDistribution():
                 
             self.__y = self.__X[1]
             print("[PROCESS] Creating countVectors for the corpus please wait!")
-            
-            self.visualize_data(list(self.__X[0].loc[self.__X[1] == 0]))
+            toxic = list(self.__X[0].loc[self.__X[1] == 1])
+            nonToxic = list(self.__X[0].loc[self.__X[1] == 0])
+            balanced =   nonToxic[:25000] 
+            self.visualize_data(balanced)
             self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
             self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
             print("[INFO] Checking for a previosly stored JOB file...")
