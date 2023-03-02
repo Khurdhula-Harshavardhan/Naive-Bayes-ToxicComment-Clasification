@@ -228,10 +228,10 @@ class BernoulliDistribution():
                 
             self.__y = self.__X[1]
             print("[PROCESS] Creating countVectors for the corpus please wait!")
-            toxic = list(self.__X[0].loc[self.__X[1] == 1])
-            nonToxic = list(self.__X[0].loc[self.__X[1] == 0])
-            balanced =   nonToxic[:25000] 
-            self.visualize_data(balanced)
+            # toxic = list(self.__X[0].loc[self.__X[1] == 1])
+            # nonToxic = list(self.__X[0].loc[self.__X[1] == 0])
+            # balanced =   nonToxic[:25000] 
+            # self.visualize_data(balanced)
             self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
             self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
             print("[INFO] Checking for a previosly stored JOB file...")
