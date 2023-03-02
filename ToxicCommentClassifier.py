@@ -6,6 +6,8 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plotter
+from sklearn.decomposition import PCA
 import joblib
 
 class Normalization():
@@ -135,7 +137,7 @@ class BernoulliDistribution():
         Constructor initializes the attributes of the class which are necessary.
         """
         try:
-            self.__vectorizer = CountVectorizer()
+            self.__vectorizer = CountVectorizer(binary=True)
             self.__y = list()
             self.__model = BernoulliNB()
             self._accuracy = float()
@@ -174,6 +176,38 @@ class BernoulliDistribution():
             return self.__vectorizer.fit_transform(data_to_be_transformed)
         except Exception as e:
             print("[ERR] The following error occured while trying to vectorize the train set: " +str(e))
+    
+    def check(self, ind) -> int():
+        """
+        This method tries to get the toxic label for the current vector.
+
+        """
+        try:
+            val = self.__y[ind]
+            print("Returning: %d"%(val))
+            return val
+        except Exception as e:
+            pass
+
+    def visualize_data(self, comments) -> None:
+        """
+        This method plots a graph for all the unique documents within the dataset.
+        """
+        comments = comments[:10000]
+        X = self.__vectorizer.fit_transform(comments).toarray()
+
+        # perform PCA on the word counts
+        pca = PCA(n_components=2)
+        X_pca = pca.fit_transform(X)
+        
+        # plot the comments on a scatter plot using PCA components 1 and 2
+        plotter.scatter(X_pca[:,0], X_pca[:,1], c = ['b']) #,  c=['r' if  self.check(i) == 1 else 'b' for i in range(len(X_pca[:,0]))])
+        plotter.xlabel('Feature Space')
+        plotter.ylabel('Residual Variability')
+        #plotter.axhline(y=X_pca[:, 1].mean(), color='r', linestyle='--')
+        #plotter.axvline(x=X_pca[:, 0].mean(), color='r', linestyle='--')
+
+        plotter.show()
 
     def train_NB_model(self, path_to_train_file =  "./datasets/train.csv") -> BernoulliNB():
         """
@@ -187,6 +221,8 @@ class BernoulliDistribution():
                 
             self.__y = self.__X[1]
             print("[PROCESS] Creating countVectors for the corpus please wait!")
+            
+            self.visualize_data(list(self.__X[0].loc[self.__X[1] == 0]))
             self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
             self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
             print("[INFO] Checking for a previosly stored JOB file...")
