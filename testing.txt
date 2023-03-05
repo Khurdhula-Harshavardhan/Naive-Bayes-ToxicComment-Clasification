@@ -1,0 +1,23 @@
+accuracy: 0.941269
+Outliers:
+
+
+what the F*** are you going on about? - False
+cant wait for someone to punch you in the face. - False
+I cant wait for someone to punch you in your stupid ass face. - True
+I cant wait for someone to punch you in your S***** a** face - False.
+
+- For any occurance of the word mom or mother or mommy, Dad the classifier identifies it to be Toxic.
+- However, the word Father is classified correctly for somereason.
+
+I hope you never become a father! - False
+You'd be a great dad like Hitler -  True
+- Assumption the token Hilter probably caused it to be classified as Toxic.
+
+
+Possible Solution:
+Convolutional Neural Networks for Grapheme to Phoneme Conversion.
+
+Sources:
+https://arxiv.org/pdf/1903.11508.pdf
+https://www.mdpi.com/2076-3417/9/6/1143#:~:text=Grapheme%2Dto%2Dphoneme%20(G2P,and%20automatic%20speech%20recognition%20systems.

@@ -1,0 +1,52 @@
+Toxic Comments: 5000, Non Toxic Comments: 5000
+Accuracy = 0.7085
+Precision = 0.6528
+F1 - Score = 0.7543
+Recall = 0.892755
+
+Toxic Comments: 7500, Non Toxic Comments: 5000
+Accuracy = 0.7312
+Precision = 0.7138
+F1 - Score = 0.7989
+Recall = 0.9072
+
+Toxic Comments: 7500, Non Toxic Comments: 7500
+Accuracy = 0.7133
+Precision = 0.6570
+F1 - Score = 0.7560
+Recall = 0.8900
+
+Toxic Comments: 10000, Non Toxic Comments: 7500
+Accuracy = 0.7262
+Precision = 0.699081
+F1 - Score = 0.7881
+Recall = 0.9033
+
+Toxic Comments: 10000, Non Toxic Comments: 10000
+Accuracy = 0.6984
+Precision = 0.6463
+F1 - Score = 0.7448
+Recall = 0.8787
+
+Toxic Comments: 10000, Non Toxic Comments: 5000
+Accuracy = 0.7085
+Precision = 0.6528
+F1 - Score = 0.7543
+Recall = 0.892755
+
+we realized that changing the non toxic comments is the key.
+
+Toxic Comments: All, Non Toxic Comments: 115416
+Accuracy = 0.894358
+Precision = 0.532680
+F1 - Score = 0.608061
+Recall = 0.708294
+
+BEST FIT:
+Toxic Comments: All, Non Toxic Comments: ALL
+TEST SPLIT: 0.4
+RANDOM STATE=42
+Accuracy = 0.9370
+Precision = 0.7249
+F1 - Score = 0.625035
+Recall = 0.549303
