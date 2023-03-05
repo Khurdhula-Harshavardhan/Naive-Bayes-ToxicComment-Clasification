@@ -10,6 +10,7 @@ import matplotlib.pyplot as plotter
 from sklearn.decomposition import PCA
 import joblib
 import numpy as np
+from sklearn.metrics import precision_recall_fscore_support
 
 class Normalization():
     """
@@ -132,6 +133,9 @@ class BernoulliDistribution():
     _y_test = None
     __model = None
     _accuracy = None
+    _F1_score = None
+    _recall = None
+    _precision = None
     __MODEL_NAME = None #constant.
     def __init__(self) -> None:
         """
@@ -143,6 +147,9 @@ class BernoulliDistribution():
             self.__model = BernoulliNB()
             self._accuracy = float()
             self.__MODEL_NAME = "BernoulliClassifier.joblib"
+            self._recall = float()
+            self._precision = float()
+            self._F1_score = float()
         except Exception as e:
             print("[ERR] The following error occured while trying to Initialize values for Bernoulli Class: "+str(e))
 
@@ -201,7 +208,7 @@ class BernoulliDistribution():
         X_pca = pca.fit_transform(X)
         plotter.figure(figsize=(8,8))
         # plot the comments on a scatter plot using PCA components 1 and 2
-        plotter.scatter(X_pca[:,0], X_pca[:,1], c='b') #,c=['r' if  self.check(i) == 1 else 'b' for i in range(len(X_pca[:,0]))], cmap='coolwarm')
+        plotter.scatter(X_pca[:,0], X_pca[:,1], c='r') #,c=['r' if  self.check(i) == 1 else 'b' for i in range(len(X_pca[:,0]))], cmap='coolwarm')
         plotter.xlabel('Feature Space')
         plotter.ylabel('Residual Variability')
         # plotter.axhline(y=X_pca[:, 1].mean(), color='r', linestyle='--', label="Mean RV")
@@ -224,16 +231,20 @@ class BernoulliDistribution():
             print("[IMPORTANT] Preparing corpus please wait!")
             self._normalizer = Normalization(path_to_train_file) #create the object that should be useful for normalizing the entire dataset.
             self._normalizer.normalize() #Normalization is performed on entire dataset, and respective corpuses are created.
-            self.__X = pd.DataFrame(self._normalizer._corpus)
-                
-            self.__y = self.__X[1]
+            # tox = pd.DataFrame(self._normalizer._toxic_corpus, columns=["comment", "is_toxic"])
+            # perct = int(self._normalizer._get_total_non_toxic_comments_count() * 1)
+            # print(perct)
+            # non_tox = pd.DataFrame(self._normalizer._non_toxic_corpus[:perct], columns=["comment", "is_toxic"])
+            self.__X = pd.DataFrame(self._normalizer._corpus, columns=["comment", "is_toxic"])
+            
+            self.__y = self.__X["is_toxic"]
             print("[PROCESS] Creating countVectors for the corpus please wait!")
-            # toxic = list(self.__X[0].loc[self.__X[1] == 1])
-            # nonToxic = list(self.__X[0].loc[self.__X[1] == 0])
-            # balanced =   nonToxic[:25000] 
+            # toxic = list(self.__X["comment"].loc[self.__X["is_toxic"] == 1])
+            # nonToxic = list(self.__X["comment"].loc[self.__X["is_toxic"] == 0])
+            # balanced =   toxic[:25000] 
             # self.visualize_data(balanced)
-            self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X[0])
-            self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.35)
+            self.__X_vectorized  = self.__vectorizer.fit_transform(self.__X["comment"])
+            self._X_train, self._X_test, self._y_train, self._y_test = train_test_split(self.__X_vectorized, self.__y, test_size=0.4, random_state=50)
             print("[INFO] Checking for a previosly stored JOB file...")
             if not self.load_model(): #if the model does not exist we must trian a new isntance of it and dump it.
 
@@ -258,7 +269,14 @@ class BernoulliDistribution():
         try:
             predictions = model.predict(self._X_test)
             self._accuracy = accuracy_score(predictions, self._y_test)
-            print("[INFO] The accuracy for the trained model is: %f"%(self._accuracy))
+            self._precision, self._recall, self._F1_score, _ = precision_recall_fscore_support(self._y_test, predictions, average='binary')
+            print("-"*50)
+            print("Here are the model metrics: ")
+            print("[METRIC] Accuracy Score: %f"%(self._accuracy))
+            print("[METRIC] Precision: %f"%(self._precision))
+            print("[METRIC] F1-Score: %f"%(self._F1_score))
+            print("[METRIC] Recall: %f"%(self._recall))
+            
             return self._accuracy
         except Exception as e:
             print("[ERR] The following error occured while trying to test the model for accuracy! "+str(e))
@@ -279,16 +297,38 @@ class BernoulliDistribution():
         try:
             prediction  = self.__model.predict(self.transform_single_comment([comment])) #this is an array of predictions.
             if prediction[0] == 0:
-                return False
+                return "[PREDICTION] IsToxic: False"
             else:
-                return True 
+                return "[PREDICTION] IsToxic: True" 
         except Exception as e:
             print("[ERR] The following error occured while trying to make a prediction: %s"%(str(e)))
 
-obj = BernoulliDistribution()
-trained_model = obj.train_NB_model()
-print(obj.traditional_test(trained_model))
+    def test_NB_model(self, path_to_test_file, NB_model) -> None:
+        try:
+            self.__model = NB_model
+            data_frame = pd.read_csv(path_to_test_file)
+            data_frame = data_frame["comment_text"]
 
-while True:
-    comment = input("Enter a comment to be tested: ")
-    print(obj.predict_if_toxic(comment))
+            predicted_data = list()
+            print("[PROCESS] PREDICTING CLASSES FOR TESTSET THIS MIGHT TAKE A LONG WHILE!")
+            for comment in data_frame.values:
+                comment = self._normalizer.normalize_comment(comment)
+                if len(comment.strip(" ")) == 0:
+                    continue
+                proba = self.__model.predict_proba(self.transform_single_comment([comment]))
+                #print("0 class: %f, 1 class: %f"%(proba[0][0], proba[0][1]))
+                predicted_class = None
+                if proba[0][1]>0.5:
+                    predicted_class = 1
+                else:
+                    predicted_class = 0
+                val = [comment, float(proba[0][1]), predicted_class]
+                predicted_data.append(val)
+            
+            output_data_frame= pd.DataFrame(predicted_data, columns=["comment_text", "toxic_probability","is_toxic"])
+            print(output_data_frame.head())
+            output_data_frame.to_csv("./datasets/_output.csv")
+            print("[PROCESS] Successfully generated the output file!")
+        except Exception as e:
+            print("[ERR] the following error occured while trying to peform test: %s"%(str(e)))
+
